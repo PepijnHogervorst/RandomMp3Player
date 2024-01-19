@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RandomMp3Player": {
+      "commandName": "Project",
+      "commandLineArgs": "2 5"
+    }
+  }
+}

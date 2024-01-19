@@ -18,6 +18,8 @@ internal class WavPlayerWorker
 
 
     #region Public properties
+    public int MinimumDelayInSeconds { get; private set; } = 5;
+    public int MaximumDelayInSeconds { get; private set; } = 20;
     #endregion
 
 
@@ -44,14 +46,20 @@ internal class WavPlayerWorker
     {
         _tokenSource.Cancel();
     }
+
+    public void SetDelayTimeLimits(int minimumSeconds, int maximumSeconds)
+    {
+        MinimumDelayInSeconds = minimumSeconds;
+        MaximumDelayInSeconds = maximumSeconds;
+    }
     #endregion
 
 
     #region Private methods
     private void IndexAllMp3FilesOfCurrentExeDirectory()
     {
-        var exeFilePath = Environment.ProcessPath;
-        var exeDirPath = Path.GetDirectoryName(exeFilePath);
+        string? exeFilePath = Environment.ProcessPath;
+        string? exeDirPath = Path.GetDirectoryName(exeFilePath);
         if (string.IsNullOrEmpty(exeDirPath)) return;
 
         _wavFilePaths = Directory.GetFiles(exeDirPath, "*.wav", SearchOption.AllDirectories);
@@ -61,7 +69,7 @@ internal class WavPlayerWorker
     {
         while (!token.IsCancellationRequested)
         {
-            await Task.Delay(TimeSpan.FromSeconds(_random.Next(5, 20)), token);
+            await Task.Delay(TimeSpan.FromSeconds(_random.Next(MinimumDelayInSeconds, MaximumDelayInSeconds)), token);
 
             PlaySoundFromDirectory();
         }
@@ -73,8 +81,8 @@ internal class WavPlayerWorker
 
         _soundPlayer.SoundLocation = _wavFilePaths[_random.Next(0, _wavFilePaths.Length)];
         ClearCurrentConsoleLine();
-        var exeFilePath = Assembly.GetEntryAssembly()?.Location;
-        var exeDirPath = Path.GetDirectoryName(exeFilePath);
+        string? exeFilePath = Assembly.GetEntryAssembly()?.Location;
+        string? exeDirPath = Path.GetDirectoryName(exeFilePath);
         Console.Write($"Playing '{Path.GetFileName(_soundPlayer.SoundLocation)}' from folder {exeDirPath}");
         _soundPlayer.PlaySync();
         ClearCurrentConsoleLine();
